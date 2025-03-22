@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Gesture & Voice Navigation",
+  "version": "1.0",
+  "description": "Navigate websites using hand gestures and voice commands.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "100": "icons/icon100.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

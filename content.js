@@ -92,11 +92,28 @@ if (!window.hasVoiceRecognition) {
         }
         else if (command.includes("open new window")) {
             chrome.runtime.sendMessage({ action: "openNewWindow" });
-        } else if (command.includes("close tab") || command.includes("close window") || command.includes("exit window")) {
-            window.close();
-        } else if (command.includes("minimize window")) {
+        } else if (command.includes("close window") || command.includes("exit window") || command.includes("close tab")) {
+            chrome.runtime.sendMessage({ action: "closeCurrentWindow" });
+        }
+        
+        else if (command.includes("minimize window")) {
             chrome.runtime.sendMessage({ action: "minimizeWindow" });
         }
+        else if (command.startsWith("click")) {
+            let targetText = command.replace("click", "").trim();
+            clickElementByTextOrId(targetText);
+        }
+        else if (command.startsWith("focus on")) {
+            let targetText = command.replace("focus on", "").trim();
+            focusElementByTextOrPlaceholder(targetText);
+        }
+        else if (command.startsWith("type")) {
+            let [_, inputText, targetText] = command.match(/type (.+) into (.+)/) || [];
+            if (inputText && targetText) {
+                typeIntoInput(targetText.trim(), inputText.trim());
+            }
+        }
+        
           
     }
 
@@ -108,4 +125,73 @@ if (!window.hasVoiceRecognition) {
         console.log(`Zoom set to: ${currentZoom}`);
     }
 }
+
+
+
+
+// Try to match commands like "click login button" or "focus on search"
+
+
+
+
+
+js
+function clickElementByTextOrId(text) {
+    text = text.toLowerCase();
+
+    // Try matching by ID
+    const byId = document.getElementById(text);
+    if (byId) {
+        byId.click();
+        console.log("Clicked element by ID:", text);
+        return;
+    }
+
+    // Try matching by button text
+    const buttons = [...document.querySelectorAll("button, a, div, span")];
+    const matched = buttons.find(el => el.innerText.toLowerCase().includes(text));
+    if (matched) {
+        matched.click();
+        console.log("Clicked element with text:", text);
+    } else {
+        console.warn("No element found to click with:", text);
+    }
+}
+
+function focusElementByTextOrPlaceholder(text) {
+    text = text.toLowerCase();
+
+    // Try matching inputs or textareas by placeholder
+    const inputs = [...document.querySelectorAll("input, textarea")];
+    const matched = inputs.find(el => 
+        el.placeholder && el.placeholder.toLowerCase().includes(text)
+    );
+
+    if (matched) {
+        matched.focus();
+        console.log("Focused element with placeholder:", text);
+    } else {
+        console.warn("No input found with placeholder:", text);
+    }
+}
+
+function typeIntoInput(fieldText, inputText) {
+    fieldText = fieldText.toLowerCase();
+
+    const inputs = [...document.querySelectorAll("input, textarea")];
+    const matched = inputs.find(el => 
+        (el.placeholder && el.placeholder.toLowerCase().includes(fieldText)) ||
+        (el.id && el.id.toLowerCase().includes(fieldText))
+    );
+
+    if (matched) {
+        matched.focus();
+        matched.value = inputText;
+        matched.dispatchEvent(new Event('input', { bubbles: true }));
+        console.log(`Typed "${inputText}" into field "${fieldText}"`);
+    } else {
+        console.warn("No input found for typing:", fieldText);
+    }
+}
+
 

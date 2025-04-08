@@ -3,7 +3,8 @@
   "name": "Gesture & Voice Navigation",
   "version": "1.0",
   "description": "Navigate websites using hand gestures and voice commands.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "permissions": ["activeTab", "scripting", "storage","tabs","windows"
+],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
     "service_worker": "background.js"

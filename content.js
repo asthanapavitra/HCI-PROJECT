@@ -1,5 +1,6 @@
+
 if (!window.hasVoiceRecognition) {
-    window.hasVoiceRecognition = true; // Prevent multiple injections
+    window.hasVoiceRecognition = true;
 
     let recognition;
     let isListening = false;
@@ -28,7 +29,7 @@ if (!window.hasVoiceRecognition) {
             return;
         }
 
-        if (isListening) return; // Avoid multiple instances
+        if (isListening) return;
 
         recognition = new webkitSpeechRecognition();
         recognition.continuous = true;
@@ -49,9 +50,7 @@ if (!window.hasVoiceRecognition) {
         recognition.onerror = (event) => console.error("Error:", event.error);
 
         recognition.onend = () => {
-            if (isListening) {
-                recognition.start(); // Restart on end
-            }
+            if (isListening) recognition.start();
         };
 
         recognition.start();
@@ -86,6 +85,27 @@ if (!window.hasVoiceRecognition) {
             let site = command.replace("search for", "").trim();
             let url = `https://www.google.com/search?q=${site}`;
             window.location.href = url;
+        } else if (command.includes("zoom in")) {
+            zoomPage(0.1); // Zoom in by 10%
+        } else if (command.includes("zoom out")) {
+            zoomPage(-0.1); // Zoom out by 10%
         }
+        else if (command.includes("open new window")) {
+            chrome.runtime.sendMessage({ action: "openNewWindow" });
+        } else if (command.includes("close tab") || command.includes("close window") || command.includes("exit window")) {
+            window.close();
+        } else if (command.includes("minimize window")) {
+            chrome.runtime.sendMessage({ action: "minimizeWindow" });
+        }
+          
+    }
+
+    function zoomPage(change) {
+        let currentZoom = parseFloat(document.body.style.zoom) || 1;
+        currentZoom += change;
+        currentZoom = Math.max(0.1, Math.min(currentZoom, 3)); // limit zoom range
+        document.body.style.zoom = currentZoom;
+        console.log(`Zoom set to: ${currentZoom}`);
     }
 }
+
